@@ -70,6 +70,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'project.wsgi.application'
+AUTH_USER_MODEL = 'firstapp.Student'
 
 
 # Database

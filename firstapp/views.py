@@ -1,115 +1,139 @@
-from django.shortcuts import render
-from firstapp.models import Country, State
+from rest_framework.permissions import AllowAny
+from django.http import Http404
+from .models import *
+from .serializers import RegisterSerializer, TeacherSerializer,ClassListSerializer,CollegeSerializer,LoginSerializer
 from rest_framework.response import Response
-from rest_framework import views
-# Create your views here.
-class ABC(views.APIView):
-    def get(self, request):
-        return Response('Hi....')
-
-class InsertCountry(views.APIView):
-    def post(self, request):
-        request_data=request.data
-        country_name=request_data['country_name']
-        country_code=request_data['country_code']
-        Country.objects.create(country_name=country_name,country_code=country_code)
-        res={
-            'status':1,
-            'message':"Country Insert Sucessfully"
-        }
-        return Response(res)
+from rest_framework import status
+from rest_framework.views import APIView
+from rest_framework.authentication import TokenAuthentication
+from rest_framework import generics
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
-class UpdateCountry(views.APIView):
-    def put(self, request,id):
-        request_data=request.data
-        country_id=id
-        country_name=request_data['country_name']
-        country_code=request_data['country_code']
-        Country.objects.filter(id=country_id).update(country_name=country_name,country_code=country_code)
-        res={
-            'status':1,
-            'message':"Country Update Sucessfully"
-        }
-        return Response(res)
+class TeacherApi(APIView):
+    def get_object(self, pk):
+        try:
+            return Teacher.objects.filter(pk=pk).first()
+        except Teacher.DoesNotExist:
+            raise Http404
 
-class DeleteCountry(views.APIView):
-    def delete(self, request,id):
-        request_data=request.data
-        country_id=id
-        Country.objects.filter(id=country_id).delete()
-        res={
-            'status':1,
-            'message':"Country Delete Sucessfully"
-        }
-        return Response(res)
+    def get(self,request, format=None):
+        teacher = Teacher.objects.all()
+        serializer = TeacherSerializer(teacher, many=True)
+        return Response(serializer.data)
 
+    def post(self,request, format=None):
+        serializer = TeacherSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-class GetAllCountry(views.APIView):
-    def get(self, request):
-        data=Country.objects.all()
-        res=[]
-        for each_country in data:
-            res.append({
-                'id':each_country.id,
-                'country_name':each_country.country_name,
-                'country_code':each_country.country_code,
-            })
-        return Response(res)
-class InsertState(views.APIView):
-    def post(self, request):
-        request_data=request.data
-        state_name=request_data['state_name']
-        state_code=request_data['state_code']
-        country_id=request_data['country_id']
-        State.objects.create(state_name=state_name,state_code=state_code,country_id=country_id)
-        res={
-            'status':1,
-            'message':"State Insert Sucessfully"
-        }
-        return Response(res)
+    def delete(self, request,pk, format=None):
+        teacher = self.get_object(pk)
+        teacher.delete()
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def put(self, request, pk, format=None):
+        teacher = self.get_object(pk)
+        serializer = TeacherSerializer(teacher, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
 
 
-class UpdateState(views.APIView):
-    def put(self, request,id):
-        request_data=request.data
-        state_id=id
-        state_name=request_data['state_name']
-        state_code=request_data['state_code']
-        country_id=request_data['country_id']
-        State.objects.filter(id=state_id).update(state_name=state_name,state_code=state_code,country_id=country_id)
-        res={
-            'status':1,
-            'message':"State Update Sucessfully"
-        }
-        return Response(res)
 
-class DeleteState(views.APIView):
-    def delete(self, request,id):
-        request_data=request.data
-        state_id=id
-        State.objects.filter(id=state_id).delete()
-        res={
-            'status':1,
-            'message':"State Delete Sucessfully"
-        }
-        return Response(res)
 
-class GetCountryWiseState(views.APIView):
-    def get(self, request,id):
-        data=Country.objects.filter(id=id).first()
-        res=[]
-        state_data=State.objects.filter(country_id=id)
-        for each_state in state_data:
-            res.append({
-                'id':each_state.id,
-                'state_name':each_state.state_name,
-                'state_code':each_state.state_code,
-            })
-        array={
-            'country_id':data.id,
-            'country_name':data.country_name,
-            'country_code':data.country_code,
-            'state':res
-        }
-        return Response(array)
+
+class ClassListApi(APIView):
+    def get_object(self, pk):
+        try:
+            return ClassList.objects.filter(pk=pk).first()
+        except ClassList.DoesNotExist:
+            raise Http404
+
+    def get(self,request, format=None):
+        class_list = ClassList.objects.all()
+        serializer = ClassListSerializer(class_list, many=True)
+        return Response(serializer.data)
+
+    def post(self,request, format=None):
+        serializer = ClassListSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request,pk, format=None):
+        class_list = self.get_object(pk)
+        class_list.delete()
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def put(self, request, pk, format=None):
+        class_list = self.get_object(pk)
+        serializer = ClassListSerializer(class_list, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+
+
+
+class CollegeApi(APIView):
+    def get_object(self, pk):
+        try:
+            return College.objects.filter(pk=pk).first()
+        except College.DoesNotExist:
+            raise Http404
+
+    def get(self,request, format=None):
+        college = College.objects.all()
+        serializer = CollegeSerializer(college, many=True)
+        return Response(serializer.data)
+
+    def post(self,request, format=None):
+        serializer = CollegeSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request,pk, format=None):
+        college = self.get_object(pk)
+        college.delete()
+        return Response(status=status.HTTP_201_CREATED)
+    
+    def put(self, request, pk, format=None):
+        college = self.get_object(pk)
+        serializer = CollegeSerializer(college, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status= status.HTTP_400_BAD_REQUEST)
+
+
+class RegisterStudentAPIView(generics.CreateAPIView):
+    permission_classes = (AllowAny,)
+    serializer_class = RegisterSerializer
+
+class LoginView(TokenObtainPairView):
+    permission_classes = (AllowAny,)
+    serializer_class = LoginSerializer
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
