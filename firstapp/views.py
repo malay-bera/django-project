@@ -10,6 +10,7 @@ from rest_framework import generics
 from rest_framework_simplejwt.views import TokenObtainPairView
 
 
+
 class TeacherApi(APIView):
     def get_object(self, pk):
         try:
